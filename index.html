@@ -322,16 +322,18 @@ footer{border-top:1px solid var(--line);margin-top:130px}
       <div class="progress" aria-hidden="true"><div class="fill" id="progressFill"></div><div class="mark" id="progressMark" style="left:0%"></div></div>
       <div class="stat-line"><span class="lbl">REMAINING</span><span class="val" id="remainingCount">4,444</span></div>
       <div class="stat-line"><span class="lbl">PRICE</span><span class="val" style="color:var(--accent)"><b>FREE</b></span></div>
-      <div class="stat-line"><span class="lbl">FEE TO OWNER WALLET</span><span class="val">0.0002 BNB</span></div>
+      <div class="stat-line"><span class="lbl">CREATOR FEE — FIRST 400 MINTS</span><span class="val">0.0001 BNB</span></div>
+      <div class="stat-line"><span class="lbl">CREATOR FEE — AFTER THE FIRST 400</span><span class="val">0.0003 BNB</span></div>
+      <div class="stat-line"><span class="lbl">CREATOR FEE — THIS MINT</span><span class="val" id="currentFeeVal">0.0001 BNB</span></div>
       <div class="stat-line"><span class="lbl">OWNER WALLET</span><span class="val mono" style="word-break:break-all;text-align:right" data-owner>0xafc0e7cec6948c4904031e665390bba68952bf54</span></div>
       <div class="stat-line"><span class="lbl">STATUS</span><span class="val mono" id="mintStatus">READING CONTRACT…</span></div>
     </div>
 
-    <div class="fee-note">Minting itself is <b>free</b>. With your <b>mint()</b> call you send exactly <b>0.0002 BNB</b> — that amount is the mint fee and goes to the <b>owner wallet</b>, <b data-owner>0xafc0e7cec6948c4904031e665390bba68952bf54</b>. It is not the price of the work. Network gas on BNB Chain is charged separately by the network, as always.</div>
+    <div class="fee-note">Minting itself is <b>free</b> — the work has no price. What you send with your <b>mint()</b> call is a small <b>creator fee</b> to the <b>owner wallet</b>, <b data-owner>0xafc0e7cec6948c4904031e665390bba68952bf54</b>, and it is tiered: for the <b>first 400 mints</b> the fee is exactly <b>0.0001 BNB</b> (about Rp1,000); from mint <b>401 to 4,444</b> the fee rises to exactly <b>0.0003 BNB</b> per mint. Send the amount for the tier your mint falls in — the contract checks it. Network gas on BNB Chain is charged separately by the network, as always.</div>
 
     <div class="steps">
       <div class="step"><span class="no">01</span><p><strong>Hold an Agent ID.</strong> Claim it in the Binance Wallet app under your Agentic Wallet. The contract checks it before anything else.</p></div>
-      <div class="step"><span class="no">02</span><p><strong>Call mint().</strong> One call, no arguments. Send exactly <code>0.0002 BNB</code> (200000000000000 wei) with it — the free-mint fee for the owner wallet. Your wallet shows the value before you sign.</p></div>
+      <div class="step"><span class="no">02</span><p><strong>Call mint().</strong> One call, no arguments. Send the creator fee for the current tier with it: exactly <code>0.0001 BNB</code> (100000000000000 wei) while one of the first 400 mints remains, then exactly <code>0.0003 BNB</code> (300000000000000 wei) per mint after that. The fee goes to the owner wallet. Your wallet shows the value before you sign.</p></div>
       <div class="step"><span class="no">03</span><p><strong>Your world is chosen.</strong> The block decides the seed, the seed decides the landform, the palette and the form. Nothing is curated after the fact.</p></div>
     </div>
 
@@ -340,16 +342,21 @@ footer{border-top:1px solid var(--line);margin-top:130px}
       <pre id="promptText">Mint one Woxelworld on BNB Chain (chain id 56).
 Contract: <span class="addr" data-contract>0x0000000000000000000000000000000000000000</span> (placeholder — set at launch)
 Call mint() with calldata 0x1249c58b.
-Value: exactly 0.0002 BNB (200000000000000 wei). The work itself is free; this value is the mint fee sent to the owner wallet, on top of network gas.
-Owner wallet (fee recipient): <span class="addr" data-owner>0xafc0e7cec6948c4904031e665390bba68952bf54</span></pre>
+Value — the work itself is free; this value is the creator fee sent to the owner wallet, on top of network gas, and it depends on how many have already been minted:
+- If fewer than 400 have been minted: send exactly 0.0001 BNB (100000000000000 wei).
+- If 400 or more have been minted: send exactly 0.0003 BNB (300000000000000 wei).
+Check the minted count first and send the amount for that tier; the contract rejects any other value.
+Owner wallet (creator fee recipient): <span class="addr" data-owner>0xafc0e7cec6948c4904031e665390bba68952bf54</span></pre>
     </div>
 
     <div class="codebox dark">
       <div class="codebox-head"><span>BAW CLI</span><button class="copy-btn" type="button" data-copy="cliText">COPY</button></div>
-      <pre id="cliText">baw contract-call preview --binanceChainId 56 \
+      <pre id="cliText"># Creator fee tier: use --value 100000000000000 (0.0001 BNB) while fewer than 400 are minted;
+# once 400 or more are minted, use --value 300000000000000 (0.0003 BNB) instead.
+baw contract-call preview --binanceChainId 56 \
   --from &lt;your agentic wallet&gt; \
   --to <span class="addr" data-contract>0x0000000000000000000000000000000000000000</span> \
-  --value 200000000000000 --inputData 0x1249c58b --json
+  --value 100000000000000 --inputData 0x1249c58b --json
 
 baw contract-call execute --requestId &lt;requestId&gt; --json</pre>
     </div>
@@ -360,9 +367,9 @@ baw contract-call execute --requestId &lt;requestId&gt; --json</pre>
       <p class="contract-line">Owner wallet: <span class="addr" data-owner>0xafc0e7cec6948c4904031e665390bba68952bf54</span></p>
       <div class="wp-row">
         <button class="btn solid" id="connectBtn" type="button">CONNECT WALLET</button>
-        <button class="btn ghost" id="mintBtn" type="button" disabled>MINT — FREE + 0.0002 BNB FEE</button>
+        <button class="btn ghost" id="mintBtn" type="button" disabled>MINT — FREE + 0.0001 BNB CREATOR FEE</button>
       </div>
-      <p class="wp-status" id="wpStatus">Open this page inside your Binance Agentic Wallet (or OKX / MetaMask dApp browser). Minting sends one <b>mint()</b> call with exactly 0.0002 BNB to the contract, which forwards the fee to the owner wallet (<span data-owner>0xafc0e7cec6948c4904031e665390bba68952bf54</span>). One mint per wallet.</p>
+      <p class="wp-status" id="wpStatus">Open this page inside your Binance Agentic Wallet (or OKX / MetaMask dApp browser). Minting sends one <b>mint()</b> call with the creator fee for the current tier — exactly 0.0001 BNB for each of the first 400 mints, then exactly 0.0003 BNB per mint after that — to the contract, which forwards the fee to the owner wallet (<span data-owner>0xafc0e7cec6948c4904031e665390bba68952bf54</span>). One mint per wallet.</p>
     </div>
 
     <div class="check-wallet">
@@ -416,8 +423,8 @@ baw contract-call execute --requestId &lt;requestId&gt; --json</pre>
           <div class="faq-a">Woxelworld is about worlds that build themselves from a rule, so it is minted by software that acts on its own. The contract requires the Agent ID that Binance Agentic Wallets claim, and rejects calls from other contracts. One world per wallet.</div>
         </div>
         <div class="faq-item">
-          <button class="faq-q" type="button" aria-expanded="false">If mint is free, what is the 0.0002 BNB?<span class="plus">+</span></button>
-          <div class="faq-a">The work itself costs nothing. The 0.0002 BNB sent with your mint() call is a mint fee that goes to the owner wallet, <span data-owner>0xafc0e7cec6948c4904031e665390bba68952bf54</span> — it keeps the edition running and spam out. It is separate from BNB Chain network gas, which the network charges on top and which varies.</div>
+          <button class="faq-q" type="button" aria-expanded="false">If mint is free, what is the creator fee?<span class="plus">+</span></button>
+          <div class="faq-a">The work itself costs nothing — minting is free. The amount sent with your mint() call is a small creator fee that goes to the owner wallet, <span data-owner>0xafc0e7cec6948c4904031e665390bba68952bf54</span>. It is tiered: 0.0001 BNB (about Rp1,000) for each of the first 400 mints, then 0.0003 BNB per mint from mint 401 to 4,444. It keeps the edition running and spam out, and it is separate from BNB Chain network gas, which the network charges on top and which varies.</div>
         </div>
         <div class="faq-item">
           <button class="faq-q" type="button" aria-expanded="false">What decides my piece?<span class="plus">+</span></button>
@@ -474,8 +481,15 @@ baw contract-call execute --requestId &lt;requestId&gt; --json</pre>
 var CONTRACT = "0x0000000000000000000000000000000000000000"; // placeholder, set at launch
 var OWNER_WALLET = "0xafc0e7cec6948c4904031e665390bba68952bf54"; // contract owner; receives the mint fee
 var SUPPLY = 4444;
-var FEE_WEI = "200000000000000";        // 0.0002 BNB — free-mint fee to owner wallet
-var FEE_HEX = "0xb5e620f48000";         // 0.0002 BNB in wei, hex
+var FREE_TIER_LIMIT = 400;              // first 400 mints use the lower creator fee
+var FEE_WEI_EARLY = "100000000000000";  // 0.0001 BNB — creator fee, mints 1–400
+var FEE_HEX_EARLY = "0x5af3107a4000";   // 0.0001 BNB in wei, hex
+var FEE_WEI_LATE = "300000000000000";   // 0.0003 BNB — creator fee, mints 401–4,444
+var FEE_HEX_LATE = "0x110d9316ec000";   // 0.0003 BNB in wei, hex
+function currentTier(mintedCount){ return mintedCount < FREE_TIER_LIMIT ? "early" : "late"; }
+function currentFeeWei(mintedCount){ return currentTier(mintedCount) === "early" ? FEE_WEI_EARLY : FEE_WEI_LATE; }
+function currentFeeHex(mintedCount){ return currentTier(mintedCount) === "early" ? FEE_HEX_EARLY : FEE_HEX_LATE; }
+function currentFeeLabel(mintedCount){ return currentTier(mintedCount) === "early" ? "0.0001 BNB" : "0.0003 BNB"; }
 var MINT_SELECTOR = "0x1249c58b";       // mint()
 var BSC_CHAIN_ID = "0x38";              // 56
 var RPCS = ["https://bsc-dataseed.binance.org","https://bsc-dataseed1.defibit.io","https://bsc-dataseed1.ninicoin.io","https://rpc.ankr.com/bsc","https://bsc.publicnode.com"];
@@ -758,7 +772,9 @@ function renderSupply(){
   $("chipMinted").textContent = fmt(shownMinted);
   var pct = Math.min(100, shownMinted / SUPPLY * 100);
   $("progressFill").style.width = pct + "%";
-  $("progressMark").style.left = "calc(" + pct + "% - 1px)";
+  $("progressMark").style.left = "calc(" + (FREE_TIER_LIMIT / SUPPLY * 100) + "% - 1px)"; // marks the end of the first-400 fee tier
+  var cf = $("currentFeeVal"); if(cf) cf.textContent = currentFeeLabel(shownMinted);
+  var mb = $("mintBtn"); if(mb && !account) mb.textContent = "MINT — FREE + " + currentFeeLabel(shownMinted) + " CREATOR FEE";
 }
 function rpcCall(method, params){
   var chain = Promise.reject(new Error("start"));
@@ -824,12 +840,13 @@ $("connectBtn").addEventListener("click", async function(){
   } catch(e){ wp('<span class="err">Connection rejected in the wallet.</span> Approve the request in your wallet and try again.'); }
 });
 $("mintBtn").addEventListener("click", async function(){
-  if(!contractLive){ wp('<span class="err">Contract not set yet.</span> This page ships ready: the moment the Woxelworld contract address is set at launch, this button sends the real mint() call with the 0.0002 BNB fee.'); return; }
+  if(!contractLive){ wp('<span class="err">Contract not set yet.</span> This page ships ready: the moment the Woxelworld contract address is set at launch, this button sends the real mint() call with the creator fee for the current tier — 0.0001 BNB for the first 400 mints, then 0.0003 BNB.'); return; }
   if(!provider || !account){ wp('Connect your Agentic Wallet first.'); return; }
   try {
     await ensureBSC(provider);
-    wp("Sending mint() with exactly 0.0002 BNB… confirm in your wallet.");
-    var tx = await provider.request({ method: "eth_sendTransaction", params: [{ from: account, to: CONTRACT, value: FEE_HEX, data: MINT_SELECTOR }] });
+    var feeHex = currentFeeHex(shownMinted), feeLabel = currentFeeLabel(shownMinted);
+    wp("Sending mint() with exactly " + feeLabel + " — the creator fee for this tier… confirm in your wallet.");
+    var tx = await provider.request({ method: "eth_sendTransaction", params: [{ from: account, to: CONTRACT, value: feeHex, data: MINT_SELECTOR }] });
     wp('<span class="ok">Mint sent.</span> Tx: ' + tx + ' — your world is fixed in this block. Refreshing supply…');
     setTimeout(fetchSupply, 4000);
   } catch(e){ wp('<span class="err">Mint did not go through.</span> The wallet rejected it, the wallet holds no Agent ID, or this wallet has already minted its one world.'); }
