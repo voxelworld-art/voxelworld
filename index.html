@@ -354,7 +354,7 @@ footer{border-top:1px solid var(--line);margin-top:130px}
     <div class="codebox">
       <div class="codebox-head"><span>PROMPT FOR YOUR AGENT</span><button class="copy-btn" type="button" data-copy="promptText">COPY</button></div>
       <pre id="promptText">Mint one Woxelworld on BNB Chain (chain id 56).
-Contract: <span class="addr" data-contract>0x0000000000000000000000000000000000000000</span> (placeholder — set at launch)
+Contract: <span class="addr" data-contract>0x2871269ce55c7a0cf599a982a01f446825617631</span>
 Call mint() with calldata 0x1249c58b.
 Value — the work itself is free; this value is the creator fee sent to the owner wallet, on top of network gas, and it depends on how many have already been minted:
 - If fewer than 400 have been minted: send exactly 0.0001 BNB (100000000000000 wei).
@@ -369,7 +369,7 @@ Owner wallet (creator fee recipient): <span class="addr" data-owner>0xafc0e7cec6
 # once 400 or more are minted, use --value 300000000000000 (0.0003 BNB) instead.
 baw contract-call preview --binanceChainId 56 \
   --from &lt;your agentic wallet&gt; \
-  --to <span class="addr" data-contract>0x0000000000000000000000000000000000000000</span> \
+  --to <span class="addr" data-contract>0x2871269ce55c7a0cf599a982a01f446825617631</span> \
   --value 100000000000000 --inputData 0x1249c58b --json
 
 baw contract-call execute --requestId &lt;requestId&gt; --json</pre>
@@ -377,7 +377,7 @@ baw contract-call execute --requestId &lt;requestId&gt; --json</pre>
 
     <div class="wallet-panel" aria-label="Mint from this page">
       <h3>MINT FROM THIS PAGE — AGENTIC WALLET IN A DAPP BROWSER</h3>
-      <p class="contract-line">Contract: <span class="addr" data-contract>0x0000000000000000000000000000000000000000</span> <span id="contractState">(placeholder — set at launch)</span></p>
+      <p class="contract-line">Contract: <span class="addr" data-contract>0x2871269ce55c7a0cf599a982a01f446825617631</span> <span id="contractState">(live on BNB Chain)</span></p>
       <p class="contract-line">Owner wallet: <span class="addr" data-owner>0xafc0e7cec6948c4904031e665390bba68952bf54</span></p>
       <div class="wp-row">
         <button class="btn solid" id="connectBtn" type="button">CONNECT WALLET</button>
@@ -461,7 +461,7 @@ baw contract-call execute --requestId &lt;requestId&gt; --json</pre>
   <div class="foot">
     <span>WOXELWORLD &nbsp;·&nbsp; SERIES I &nbsp;·&nbsp; 4,444</span>
     <span>OWNER <span data-owner-short>0XAFC0…BF54</span></span>
-    <span>CONTRACT <span data-contract-short>0X0000…0000 — SET AT LAUNCH</span></span>
+    <span>CONTRACT <span data-contract-short>CONTRACT 0X2871…7631</span></span>
   </div>
 </footer>
 
@@ -492,7 +492,7 @@ baw contract-call execute --requestId &lt;requestId&gt; --json</pre>
 (function(){
 "use strict";
 /* ============ CONFIG — set the real contract here at launch ============ */
-var CONTRACT = "0x0000000000000000000000000000000000000000"; // placeholder, set at launch
+var CONTRACT = "0x2871269ce55c7a0cf599a982a01f446825617631"; // live on BNB Chain
 var OWNER_WALLET = "0xafc0e7cec6948c4904031e665390bba68952bf54"; // contract owner; receives the mint fee
 var SUPPLY = 4444;
 var FREE_TIER_LIMIT = 400;              // first 400 mints use the lower creator fee
