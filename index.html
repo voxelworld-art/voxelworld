@@ -461,7 +461,7 @@ baw contract-call execute --requestId &lt;requestId&gt; --json</pre>
   <div class="foot">
     <span>WOXELWORLD &nbsp;·&nbsp; SERIES I &nbsp;·&nbsp; 4,444</span>
     <span>OWNER <span data-owner-short>0XAFC0…BF54</span></span>
-    <span>CONTRACT <span data-contract-short>CONTRACT 0X2871…7631</span></span>
+    <span>CONTRACT <span data-contract-short>0X2871…7631</span></span>
   </div>
 </footer>
 
@@ -519,7 +519,7 @@ document.querySelectorAll("[data-owner-short]").forEach(function(el){ el.textCon
 /* contract address paint */
 if(contractLive){
   document.querySelectorAll("[data-contract]").forEach(function(el){ el.textContent = CONTRACT; });
-  document.querySelectorAll("[data-contract-short]").forEach(function(el){ el.textContent = ("CONTRACT " + CONTRACT.slice(0,6) + "…" + CONTRACT.slice(-4)).toUpperCase(); });
+  document.querySelectorAll("[data-contract-short]").forEach(function(el){ el.textContent = (CONTRACT.slice(0,6) + "…" + CONTRACT.slice(-4)).toUpperCase(); });
   var cs = $("contractState"); if(cs) cs.textContent = "(live on BNB Chain)";
 }
 
