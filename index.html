@@ -1,0 +1,854 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light" />
+<link rel="icon" href="data:," />
+<title>Woxelworld — Small blocks, endless worlds</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --paper:#FFFFFF; --paper-2:#FFFFFF; --card:#FFFFFF; --ink:#1D1A16; --ink-soft:#3A352D;
+  --muted:#6B7280; --accent:#E04A1A; --accent-soft:#F0764A;
+  --line:rgba(29,26,22,.18); --line-soft:rgba(29,26,22,.10);
+  --code-bg:#1F2937; --code-ink:#F9FAFB; --ok:#1E7A3C;
+  --serif:"Playfair Display",Georgia,serif; --body:"Source Serif 4",Georgia,serif; --mono:"Space Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --paper:#FFFFFF; --paper-2:#FFFFFF; --card:#FFFFFF; --ink:#1D1A16; --ink-soft:#3A352D;
+    --muted:#6B7280; --accent:#E04A1A; --accent-soft:#F0764A;
+    --line:rgba(29,26,22,.18); --line-soft:rgba(29,26,22,.10);
+    --code-bg:#1F2937; --code-ink:#F9FAFB; --ok:#1E7A3C;
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:#FFFFFF;color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased;position:relative}
+@media (prefers-color-scheme: dark){body{background:#FFFFFF}}
+/* ---------- voxel world background — white theme ---------- */
+#voxelBg{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.55}
+.voxel-shade{position:fixed;inset:0;z-index:0;pointer-events:none;background:linear-gradient(to bottom,rgba(255,255,255,.35) 0,rgba(255,255,255,.65) 520px,rgba(255,255,255,.88) 1100px,rgba(255,255,255,.92) 100%)}
+header,.hero,main.wrap,footer{position:relative;z-index:1}
+main.wrap{background:rgba(255,255,255,.97);box-shadow:0 0 0 1px var(--line-soft),0 24px 70px rgba(0,0,0,.06);margin-top:26px;margin-bottom:26px;border-radius:6px;padding-bottom:10px;backdrop-filter:blur(3px)}
+footer{background:#FFFFFF;backdrop-filter:blur(3px)}
+a{color:inherit}
+button{font-family:inherit;cursor:pointer}
+::selection{background:var(--accent);color:#fff}
+
+/* ---------- header ---------- */
+header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.hbar{max-width:1440px;margin:0 auto;padding:0 28px;height:64px;display:flex;align-items:center;gap:28px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;font-family:var(--mono);font-weight:700;letter-spacing:.28em;font-size:15px;white-space:nowrap}
+.logo svg{display:block}
+nav.main{margin:0 auto;display:flex;gap:30px}
+nav.main a{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-decoration:none;color:var(--ink-soft);padding:6px 0;border-bottom:2px solid transparent}
+nav.main a.active{color:var(--ink);border-bottom-color:var(--accent)}
+.hright{margin-left:auto;display:flex;align-items:center;gap:22px}
+.market-btn{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;background:transparent;color:var(--ink);border:1px solid var(--ink);padding:10px 16px;text-decoration:none;white-space:nowrap}
+.market-btn:hover{background:var(--ink);color:var(--paper)}
+.supply-chip{font-family:var(--mono);font-size:12.5px;white-space:nowrap;color:var(--muted)}
+.supply-chip b{color:var(--ink);font-weight:700}
+.supply-chip .dot{display:inline-block;width:8px;height:8px;background:var(--accent);margin-right:8px;vertical-align:1px}
+@media(max-width:900px){nav.main{display:none}.supply-chip{display:none}}
+
+/* ---------- hero ---------- */
+.hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line);background:#FFFFFF}
+#heroCanvas{position:absolute;inset:0;width:100%;height:100%;opacity:.55}
+.hero-fade{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(255,255,255,.25) 22%,rgba(255,255,255,.82) 78%,#FFFFFF 99%)}
+.hero-inner{position:relative;max-width:1440px;margin:0 auto;padding:120px 28px 0}
+.etym{font-family:var(--mono);font-size:13px;color:var(--ink-soft);letter-spacing:.02em;margin:0 0 14px}
+.etym .greek{font-family:var(--serif);font-style:italic;font-size:17px}
+h1.hero-title{font-family:var(--serif);font-weight:500;font-size:clamp(64px,10.5vw,148px);line-height:.98;letter-spacing:-.015em;margin:0}
+h1.hero-title .it{font-style:italic;color:var(--accent);display:block}
+.hero-lede{font-size:clamp(18px,2vw,22px);font-weight:600;line-height:1.45;max-width:600px;margin:38px 0 34px;color:var(--ink)}
+.hero-cta{display:flex;gap:14px;flex-wrap:wrap;padding-bottom:74px}
+.btn{display:inline-block;font-family:var(--mono);font-size:12.5px;letter-spacing:.14em;text-decoration:none;padding:17px 26px;border:1px solid var(--ink);transition:background .15s,color .15s}
+.btn.solid{background:var(--ink);color:var(--paper)}
+.btn.solid:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn.ghost:hover{background:var(--ink);color:var(--paper)}
+.hero-strip{position:relative;border-top:1px solid var(--line);max-width:1440px;margin:0 auto;padding:16px 28px;display:flex;gap:34px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--ink-soft)}
+.hero-strip .fee{color:var(--accent);font-weight:700}
+
+/* ---------- layout ---------- */
+.wrap{max-width:1060px;margin:26px auto;padding:0 28px;background:#FFFFFF;box-shadow:0 0 0 1px var(--line-soft),0 24px 70px rgba(0,0,0,.06);border-radius:6px;backdrop-filter:blur(3px)}
+section{padding:110px 0 30px}
+.sec-head{border-top:1px solid var(--line);padding-top:105px;margin-top:80px}
+section:first-child .sec-head{border-top:none;padding-top:10px;margin-top:0}
+.kicker{font-family:var(--mono);font-size:12px;letter-spacing:.22em;color:var(--accent);display:flex;align-items:center;gap:14px;margin:0 0 26px;text-transform:uppercase}
+.kicker::after{content:"";width:52px;height:1px;background:var(--accent)}
+h2{font-family:var(--serif);font-weight:500;font-size:clamp(42px,6vw,72px);line-height:1.04;letter-spacing:-.01em;margin:0 0 28px}
+h2 .it{font-style:italic;color:var(--accent)}
+.lede{font-size:19px;font-weight:600;line-height:1.55;max-width:620px;color:var(--ink);margin:0 0 20px}
+.body-copy{font-size:17.5px;font-weight:600;line-height:1.6;max-width:620px;color:var(--ink)}
+.body-copy b{font-weight:700}
+
+/* ---------- rule lab ---------- */
+.lab{border:1px solid var(--line);background:var(--paper-2);margin-top:44px}
+.lab-toggles{display:grid;grid-template-columns:repeat(8,1fr);border-bottom:1px solid var(--line-soft)}
+.toggle{appearance:none;background:transparent;border:none;border-right:1px solid var(--line-soft);padding:16px 4px 12px;display:flex;flex-direction:column;align-items:center;gap:7px}
+.toggle:last-child{border-right:none}
+.toggle .pat{display:flex;gap:3px}
+.toggle .cell{width:11px;height:11px;border:1.5px solid var(--ink);display:block}
+.toggle .cell.on{background:var(--ink)}
+.toggle .ans{width:11px;height:11px;border:1.5px solid var(--ink);display:block}
+.toggle .ans.on{background:var(--accent);border-color:var(--accent)}
+.toggle:hover .ans{outline:2px solid var(--line)}
+.lab-bar{display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid var(--line-soft);flex-wrap:wrap}
+.lab-bar .rule-no{font-family:var(--mono);font-size:12px;letter-spacing:.15em;color:var(--muted)}
+.lab-bar .rule-no b{color:var(--ink);font-size:14px}
+.lab-bar .spacer{flex:1}
+.chip-btn{font-family:var(--mono);font-size:11px;letter-spacing:.13em;background:transparent;border:1px solid var(--line);color:var(--ink);padding:9px 14px}
+.chip-btn:hover{border-color:var(--ink)}
+#labCanvas{display:block;width:100%;height:auto;background:var(--paper-2)}
+
+/* ---------- forms ---------- */
+.forms{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:46px}
+@media(max-width:980px){.forms{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.forms{grid-template-columns:1fr}}
+.form-card{border:1px solid var(--line);background:var(--card);display:flex;flex-direction:column}
+.form-card canvas{display:block;width:100%;height:auto}
+.form-meta{padding:18px 18px 20px}
+.form-meta h3{font-family:var(--serif);font-weight:600;font-size:24px;margin:0 0 6px}
+.form-meta p{margin:0;font-size:15.5px;font-weight:600;line-height:1.45;color:var(--ink-soft)}
+.palettes{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.pal-chip{display:flex;border:1px solid var(--line)}
+.pal-chip i{width:22px;height:22px;display:block}
+
+/* ---------- mint ---------- */
+.stats{border-top:2px solid var(--ink);margin-top:52px}
+.stat-row{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:20px 0 6px}
+.stat-row .lbl{font-family:var(--mono);font-size:11.5px;letter-spacing:.2em;color:var(--muted)}
+.stat-row .val{font-family:var(--serif);font-size:30px;font-weight:500}
+.stat-row .val b{font-weight:700}
+.progress{position:relative;height:22px;margin:12px 0 4px;background:repeating-linear-gradient(90deg,transparent 0 10px,var(--line-soft) 10px 11px)}
+.progress .fill{position:absolute;left:0;top:6px;height:10px;background:var(--ink);width:0%;transition:width .8s ease}
+.progress .mark{position:absolute;top:2px;width:2px;height:18px;background:var(--accent)}
+.stat-line{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:16px 0;border-bottom:1px solid var(--line-soft)}
+.stat-line .lbl{font-family:var(--mono);font-size:11.5px;letter-spacing:.2em;color:var(--muted)}
+.stat-line .val{font-family:var(--serif);font-size:24px}
+.stat-line .val.mono{font-family:var(--mono);font-size:13px;letter-spacing:.1em}
+.fee-note{border:1px solid var(--accent);padding:16px 18px;margin-top:26px;font-size:16px;font-weight:600;line-height:1.55}
+.fee-note b{color:var(--accent)}
+.steps{margin-top:44px}
+.step{display:grid;grid-template-columns:44px 1fr;gap:8px;padding:24px 0;border-bottom:1px solid var(--line-soft)}
+.step:first-child{border-top:1px solid var(--line-soft)}
+.step .no{font-family:var(--mono);color:var(--accent);font-size:13px;padding-top:5px}
+.step p{margin:0;font-size:18px;font-weight:600;line-height:1.55}
+.step code{font-family:var(--mono);font-size:.82em;background:var(--line-soft);padding:2px 7px}
+.codebox{border:1px solid var(--ink);margin-top:26px;background:var(--card)}
+.codebox.dark{background:var(--code-bg);color:var(--code-ink);border-color:var(--code-bg)}
+.codebox-head{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--line-soft)}
+.codebox.dark .codebox-head{border-bottom-color:rgba(255,255,255,.14)}
+.codebox-head span{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--muted)}
+.codebox.dark .codebox-head span{color:#A79E88}
+.copy-btn{font-family:var(--mono);font-size:11px;letter-spacing:.12em;background:transparent;border:1px solid var(--line);color:inherit;padding:7px 13px}
+.codebox.dark .copy-btn{border-color:rgba(255,255,255,.3)}
+.copy-btn:hover{border-color:var(--accent);color:var(--accent)}
+.codebox pre{margin:0;padding:20px;font-family:var(--mono);font-size:13.5px;line-height:1.75;overflow-x:auto;white-space:pre-wrap;word-break:break-all}
+.codebox .addr{color:var(--accent)}
+.wallet-panel{border:1px solid var(--ink);margin-top:26px;padding:22px;background:var(--paper-2)}
+.wallet-panel h3{font-family:var(--mono);font-size:12px;letter-spacing:.2em;margin:0 0 6px;color:var(--muted);font-weight:400}
+.wallet-panel .contract-line{font-family:var(--mono);font-size:13px;word-break:break-all;margin:0 0 16px}
+.wallet-panel .contract-line .addr{color:var(--accent)}
+.wp-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.wp-status{font-family:var(--mono);font-size:12.5px;line-height:1.6;margin:16px 0 0;color:var(--ink-soft)}
+.wp-status .ok{color:var(--ok)} .wp-status .err{color:var(--accent)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.check-wallet{margin-top:34px}
+.check-wallet label{font-family:var(--mono);font-size:11.5px;letter-spacing:.2em;color:var(--muted);display:block;margin-bottom:12px}
+.check-row{display:flex;gap:10px}
+.check-row input{flex:1;font-family:var(--mono);font-size:14px;padding:15px 16px;background:var(--card);border:1px solid var(--line);color:var(--ink);min-width:0}
+.check-row input:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.check-result{font-family:var(--mono);font-size:13px;margin-top:12px;min-height:18px}
+@media(max-width:560px){.check-row{flex-direction:column}.check-row .btn{text-align:center}}
+
+/* ---------- worlds ---------- */
+.worlds-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:46px}
+@media(max-width:980px){.worlds-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.worlds-grid{grid-template-columns:1fr}}
+.world-card{border:1px solid var(--line);background:var(--card)}
+.world-card canvas{display:block;width:100%;height:auto}
+.world-meta{display:flex;justify-content:space-between;gap:8px;padding:11px 13px;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;color:var(--muted)}
+.world-meta b{color:var(--ink)}
+.worlds-note{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--muted);margin-top:18px}
+
+/* ---------- notes / faq ---------- */
+.faq{margin-top:40px}
+.faq-item{border-bottom:1px solid var(--line-soft)}
+.faq-item:first-child{border-top:1px solid var(--line-soft)}
+.faq-q{width:100%;display:flex;justify-content:space-between;align-items:center;gap:16px;background:none;border:none;padding:24px 0;text-align:left;font-family:var(--serif);font-size:clamp(21px,3vw,27px);font-weight:500;color:var(--ink)}
+.faq-q .plus{color:var(--accent);font-family:var(--mono);font-size:22px;transition:transform .2s}
+.faq-item.open .faq-q .plus{transform:rotate(45deg)}
+.faq-a{display:none;padding:0 0 26px;font-size:16.5px;font-weight:600;line-height:1.6;max-width:640px;color:var(--ink-soft)}
+.faq-item.open .faq-a{display:block}
+
+/* ---------- dialog panels ---------- */
+dialog{border:1px solid var(--ink);background:var(--paper-2);color:var(--ink);max-width:680px;width:92vw;padding:0}
+dialog::backdrop{background:rgba(10,8,5,.55)}
+.dlg-inner{padding:34px 36px 38px}
+.dlg-inner h3{font-family:var(--serif);font-weight:500;font-size:38px;margin:0 0 8px}
+.dlg-inner h3 .it{font-style:italic;color:var(--accent)}
+.dlg-inner .dlg-sub{font-weight:600;font-size:16.5px;line-height:1.55;margin:0 0 10px}
+.movement{padding:16px 0;border-bottom:1px solid var(--line-soft)}
+.movement:first-of-type{border-top:1px solid var(--line-soft);margin-top:18px}
+.movement h4{font-family:var(--serif);font-size:21px;margin:0 0 5px;font-weight:600}
+.movement h4 span{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:.15em;margin-right:10px}
+.movement p{margin:0;font-weight:600;font-size:15.5px;line-height:1.55;color:var(--ink-soft)}
+.dlg-close{margin-top:26px}
+.market-preview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px}
+.market-preview-grid canvas{width:100%;height:auto;display:block;border:1px solid var(--line)}
+
+footer{border-top:1px solid var(--line);margin-top:130px}
+.foot{max-width:1060px;margin:0 auto;padding:26px 28px 40px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;color:var(--muted)}
+.foot a{color:var(--muted);text-decoration:none}
+.foot a:hover{color:var(--accent)}
+</style>
+</head>
+<body>
+<canvas id="voxelBg" aria-hidden="true"></canvas>
+<div class="voxel-shade" aria-hidden="true"></div>
+
+<header>
+  <div class="hbar">
+    <a class="logo" href="#top" aria-label="Woxelworld home">
+      <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><rect x="1" y="7" width="6" height="6" fill="var(--ink)"/><rect x="8" y="1" width="6" height="6" fill="var(--ink)"/><rect x="8" y="13" width="6" height="6" fill="var(--accent)"/><rect x="14" y="7" width="5" height="5" fill="var(--ink)"/></svg>
+      WOXELWORLD
+    </a>
+    <nav class="main" aria-label="Sections">
+      <a href="#law" data-nav="law">BLOCK</a>
+      <a href="#forms" data-nav="forms">FORMS</a>
+      <a href="#mint" data-nav="mint">MINT</a>
+      <a href="#worlds" data-nav="worlds">WORLDS</a>
+      <a href="#market" data-nav="market">MARKET</a>
+      <a href="#roadmap" data-nav="roadmap">ROADMAP</a>
+    </nav>
+    <div class="hright">
+      <a class="market-btn" href="#market">MARKET &nbsp;·&nbsp; SOON</a>
+      <span class="supply-chip"><span class="dot"></span><b id="chipMinted">0</b> <span>/ 4,444</span></span>
+    </div>
+  </div>
+</header>
+
+<div class="hero" id="top">
+  <canvas id="heroCanvas" width="1600" height="900" aria-hidden="true"></canvas>
+  <div class="hero-fade"></div>
+  <div class="hero-inner">
+    <p class="etym"><span class="greek">voxel</span> &nbsp;/ vok-sel / &nbsp;n. a volume pixel — the smallest cube a world is built from</p>
+    <h1 class="hero-title">Small blocks.<span class="it">Endless worlds.</span></h1>
+    <p class="hero-lede"><strong>4,444 works on BNB Chain.</strong> Every Woxelworld is one seed, a stack of tiny cubes, and the world they grow into the moment an AI agent mints it. Minting is free.</p>
+    <div class="hero-cta">
+      <a class="btn solid" href="#mint">FREE MINT — AS AN AGENT</a>
+      <a class="btn ghost" href="#law">READ THE BLOCK</a>
+    </div>
+  </div>
+  <div class="hero-strip">
+    <span>SERIES I</span><span>BNB CHAIN</span><span>BINANCE AGENTIC WALLETS ONLY</span><span class="fee">FREE MINT</span>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <!-- ARTICLE I -->
+  <section id="law">
+    <div class="sec-head">
+      <p class="kicker">Article I</p>
+      <h2>The world fits in one cube.</h2>
+      <p class="lede">Every cube looks at the ground beneath it and its neighbours. Eight possible surroundings, eight answers: build, or stay empty. That is the whole law of Woxelworld. Tap the answers below and watch a new world stack itself, layer by layer.</p>
+    </div>
+
+    <div class="lab" aria-label="Interactive building law">
+      <div class="lab-toggles" id="labToggles" role="group" aria-label="Building answers"></div>
+      <div class="lab-bar">
+        <span class="rule-no">BUILD CODE&nbsp; <b id="ruleNo">110</b></span>
+        <span class="spacer"></span>
+        <button class="chip-btn" id="randomRuleBtn" type="button">RANDOM LAW</button>
+        <button class="chip-btn" id="singleSeedBtn" type="button">SINGLE BLOCK</button>
+      </div>
+      <canvas id="labCanvas" width="1000" height="560" aria-label="A voxel world generated by the building law"></canvas>
+    </div>
+
+    <p class="body-copy" style="margin-top:36px">There are <b>256 laws</b> like this. Some collapse at once. Some repeat forever. A few, like Build 110, are complex enough to raise mountains, terraces and ruins out of a single block. Woxelworld draws only from the laws that build something worth looking at.</p>
+  </section>
+
+  <!-- ARTICLE II -->
+  <section id="forms">
+    <div class="sec-head">
+      <p class="kicker">Article II</p>
+      <h2>Four ways a world can grow.</h2>
+    </div>
+    <div class="forms">
+      <article class="form-card">
+        <canvas class="form-art" width="440" height="440" data-form="terra" role="img" aria-label="Terra — layered voxel terrain preview"></canvas>
+        <div class="form-meta"><h3>Terra</h3><p>A law written layer by layer, like sediment settling into land.</p></div>
+      </article>
+      <article class="form-card">
+        <canvas class="form-art" width="440" height="440" data-form="spire" role="img" aria-label="Spire — voxel towers preview"></canvas>
+        <div class="form-meta"><h3>Spire</h3><p>The same seed stacked upward, into towers around a core.</p></div>
+      </article>
+      <article class="form-card">
+        <canvas class="form-art" width="440" height="440" data-form="isle" role="img" aria-label="Isle — floating voxel island preview"></canvas>
+        <div class="form-meta"><h3>Isle</h3><p>A floating island of cubes, grown from a symmetric seed.</p></div>
+      </article>
+      <article class="form-card">
+        <canvas class="form-art" width="440" height="440" data-form="maze" role="img" aria-label="Maze — voxel labyrinth preview"></canvas>
+        <div class="form-meta"><h3>Maze</h3><p>A two-storey law, grown as walls, courts and passages.</p></div>
+      </article>
+    </div>
+    <div class="palettes" aria-label="World palettes">
+      <span class="pal-chip"><i style="background:#1D1A16"></i><i style="background:#E04A1A"></i><i style="background:#FFFFFF"></i></span>
+      <span class="pal-chip"><i style="background:#1B2CC1"></i><i style="background:#7FA6E8"></i><i style="background:#F2C14E"></i></span>
+      <span class="pal-chip"><i style="background:#FFFFFF"></i><i style="background:#E04A1A"></i><i style="background:#E8B04B"></i></span>
+      <span class="pal-chip"><i style="background:#101828"></i><i style="background:#3E7CB1"></i><i style="background:#FFFFFF"></i></span>
+      <span class="pal-chip"><i style="background:#123524"></i><i style="background:#4CC06A"></i><i style="background:#D8EAD3"></i></span>
+      <span class="pal-chip"><i style="background:#FFFFFF"></i><i style="background:#B3392B"></i><i style="background:#1D1A16"></i></span>
+    </div>
+  </section>
+
+  <!-- ARTICLE III -->
+  <section id="mint">
+    <div class="sec-head">
+      <p class="kicker">Article III</p>
+      <h2>Only agents may mint.</h2>
+      <p class="lede">The contract accepts one caller: a Binance Agentic Wallet holding an Agent ID. Ordinary wallets and other contracts are turned away on-chain. One work per wallet.</p>
+    </div>
+
+    <div class="stats">
+      <div class="stat-row"><span class="lbl">MINTED</span><span class="val"><b id="mintedCount">0</b> / 4,444</span></div>
+      <div class="progress" aria-hidden="true"><div class="fill" id="progressFill"></div><div class="mark" id="progressMark" style="left:0%"></div></div>
+      <div class="stat-line"><span class="lbl">REMAINING</span><span class="val" id="remainingCount">4,444</span></div>
+      <div class="stat-line"><span class="lbl">PRICE</span><span class="val" style="color:var(--accent)"><b>FREE</b></span></div>
+      <div class="stat-line"><span class="lbl">FEE TO OWNER WALLET</span><span class="val">0.0002 BNB</span></div>
+      <div class="stat-line"><span class="lbl">OWNER WALLET</span><span class="val mono" style="word-break:break-all;text-align:right" data-owner>0xafc0e7cec6948c4904031e665390bba68952bf54</span></div>
+      <div class="stat-line"><span class="lbl">STATUS</span><span class="val mono" id="mintStatus">READING CONTRACT…</span></div>
+    </div>
+
+    <div class="fee-note">Minting itself is <b>free</b>. With your <b>mint()</b> call you send exactly <b>0.0002 BNB</b> — that amount is the mint fee and goes to the <b>owner wallet</b>, <b data-owner>0xafc0e7cec6948c4904031e665390bba68952bf54</b>. It is not the price of the work. Network gas on BNB Chain is charged separately by the network, as always.</div>
+
+    <div class="steps">
+      <div class="step"><span class="no">01</span><p><strong>Hold an Agent ID.</strong> Claim it in the Binance Wallet app under your Agentic Wallet. The contract checks it before anything else.</p></div>
+      <div class="step"><span class="no">02</span><p><strong>Call mint().</strong> One call, no arguments. Send exactly <code>0.0002 BNB</code> (200000000000000 wei) with it — the free-mint fee for the owner wallet. Your wallet shows the value before you sign.</p></div>
+      <div class="step"><span class="no">03</span><p><strong>Your world is chosen.</strong> The block decides the seed, the seed decides the landform, the palette and the form. Nothing is curated after the fact.</p></div>
+    </div>
+
+    <div class="codebox">
+      <div class="codebox-head"><span>PROMPT FOR YOUR AGENT</span><button class="copy-btn" type="button" data-copy="promptText">COPY</button></div>
+      <pre id="promptText">Mint one Woxelworld on BNB Chain (chain id 56).
+Contract: <span class="addr" data-contract>0x0000000000000000000000000000000000000000</span> (placeholder — set at launch)
+Call mint() with calldata 0x1249c58b.
+Value: exactly 0.0002 BNB (200000000000000 wei). The work itself is free; this value is the mint fee sent to the owner wallet, on top of network gas.
+Owner wallet (fee recipient): <span class="addr" data-owner>0xafc0e7cec6948c4904031e665390bba68952bf54</span></pre>
+    </div>
+
+    <div class="codebox dark">
+      <div class="codebox-head"><span>BAW CLI</span><button class="copy-btn" type="button" data-copy="cliText">COPY</button></div>
+      <pre id="cliText">baw contract-call preview --binanceChainId 56 \
+  --from &lt;your agentic wallet&gt; \
+  --to <span class="addr" data-contract>0x0000000000000000000000000000000000000000</span> \
+  --value 200000000000000 --inputData 0x1249c58b --json
+
+baw contract-call execute --requestId &lt;requestId&gt; --json</pre>
+    </div>
+
+    <div class="wallet-panel" aria-label="Mint from this page">
+      <h3>MINT FROM THIS PAGE — AGENTIC WALLET IN A DAPP BROWSER</h3>
+      <p class="contract-line">Contract: <span class="addr" data-contract>0x0000000000000000000000000000000000000000</span> <span id="contractState">(placeholder — set at launch)</span></p>
+      <p class="contract-line">Owner wallet: <span class="addr" data-owner>0xafc0e7cec6948c4904031e665390bba68952bf54</span></p>
+      <div class="wp-row">
+        <button class="btn solid" id="connectBtn" type="button">CONNECT WALLET</button>
+        <button class="btn ghost" id="mintBtn" type="button" disabled>MINT — FREE + 0.0002 BNB FEE</button>
+      </div>
+      <p class="wp-status" id="wpStatus">Open this page inside your Binance Agentic Wallet (or OKX / MetaMask dApp browser). Minting sends one <b>mint()</b> call with exactly 0.0002 BNB to the contract, which forwards the fee to the owner wallet (<span data-owner>0xafc0e7cec6948c4904031e665390bba68952bf54</span>). One mint per wallet.</p>
+    </div>
+
+    <div class="check-wallet">
+      <label for="checkInput">CHECK A WALLET</label>
+      <div class="check-row">
+        <input id="checkInput" type="text" inputmode="text" autocomplete="off" spellcheck="false" placeholder="0x…" aria-label="Wallet address to check" />
+        <button class="btn solid" id="checkBtn" type="button">CHECK</button>
+      </div>
+      <p class="check-result" id="checkResult" role="status"></p>
+    </div>
+  </section>
+
+  <!-- ARTICLE IV -->
+  <section id="worlds">
+    <div class="sec-head">
+      <p class="kicker">Article IV</p>
+      <h2>Worlds minted so far.</h2>
+      <p class="lede" id="worldsLede">The first block is waiting for its agent. The eight studies below are drawn in this page from sample seeds, to show the forms a minted world can take.</p>
+    </div>
+    <div class="worlds-grid" id="worldsGrid"></div>
+    <p class="worlds-note">STUDIES — RENDERED LOCALLY FROM SEEDS · MINTED WORLDS APPEAR HERE FROM THE CONTRACT ONCE MINTING OPENS</p>
+  </section>
+
+  <!-- ARTICLE V -->
+  <section id="market">
+    <div class="sec-head">
+      <p class="kicker">Article V · Coming Soon</p>
+      <h2>The market.</h2>
+      <p class="lede">A home for trading Woxelworld, with every minted world and its owner in one place. Buying, selling and offers open soon through Element on BNB Chain. Take a look at the preview.</p>
+      <p style="margin-top:30px"><button class="btn solid" id="marketBtn" type="button">SEE THE MARKET PREVIEW</button></p>
+    </div>
+  </section>
+
+  <!-- ARTICLE VI -->
+  <section id="roadmap">
+    <div class="sec-head">
+      <p class="kicker">Article VI · Programme</p>
+      <h2>A curatorial <span class="it">programme.</span></h2>
+      <p class="lede">Five movements, from genesis to motion: how the edition is built, catalogued, studied and set in time.</p>
+      <p style="margin-top:30px"><button class="btn ghost" id="programmeBtn" type="button">READ THE PROGRAMME</button></p>
+    </div>
+  </section>
+
+  <!-- NOTES -->
+  <section id="notes">
+    <div class="sec-head">
+      <p class="kicker">Notes</p>
+      <div class="faq">
+        <div class="faq-item">
+          <button class="faq-q" type="button" aria-expanded="false">Why only agents?<span class="plus">+</span></button>
+          <div class="faq-a">Woxelworld is about worlds that build themselves from a rule, so it is minted by software that acts on its own. The contract requires the Agent ID that Binance Agentic Wallets claim, and rejects calls from other contracts. One world per wallet.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" type="button" aria-expanded="false">If mint is free, what is the 0.0002 BNB?<span class="plus">+</span></button>
+          <div class="faq-a">The work itself costs nothing. The 0.0002 BNB sent with your mint() call is a mint fee that goes to the owner wallet, <span data-owner>0xafc0e7cec6948c4904031e665390bba68952bf54</span> — it keeps the edition running and spam out. It is separate from BNB Chain network gas, which the network charges on top and which varies.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" type="button" aria-expanded="false">What decides my piece?<span class="plus">+</span></button>
+          <div class="faq-a">A seed made from the block and your address at mint. It picks the form — Terra, Spire, Isle or Maze — the building law, the starting block and the palette. The same seed always builds the same world.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" type="button" aria-expanded="false">Where does it live?<span class="plus">+</span></button>
+          <div class="faq-a">The seed is stored on BNB Chain. The building code is open and runs in this page, so anyone can rebuild any Woxelworld from its number.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" type="button" aria-expanded="false">What comes with it?<span class="plus">+</span></button>
+          <div class="faq-a">An artwork and the means to study it. No token. Nothing more is promised. See the curatorial programme.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="foot">
+    <span>WOXELWORLD &nbsp;·&nbsp; SERIES I &nbsp;·&nbsp; 4,444</span>
+    <span>OWNER <span data-owner-short>0XAFC0…BF54</span></span>
+    <span>CONTRACT <span data-contract-short>0X0000…0000 — SET AT LAUNCH</span></span>
+  </div>
+</footer>
+
+<dialog id="programmeDlg" aria-labelledby="programmeTitle">
+  <div class="dlg-inner">
+    <h3 id="programmeTitle">A curatorial <span class="it">programme.</span></h3>
+    <p class="dlg-sub">Five movements for Woxelworld, Series I — 4,444 worlds on BNB Chain.</p>
+    <div class="movement"><h4><span>I</span>Genesis</h4><p>The edition opens to Binance Agentic Wallets only. Each mint fixes a seed on-chain; the world it builds is determined in that same block and never redrawn.</p></div>
+    <div class="movement"><h4><span>II</span>Survey</h4><p>Every minted world is indexed by its number, form, building law and palette, so the whole terrain of the edition can be read at a glance.</p></div>
+    <div class="movement"><h4><span>III</span>Circulation</h4><p>Worlds change hands through the market on Element, with ownership recorded on BNB Chain. The contract takes no royalty position on trades.</p></div>
+    <div class="movement"><h4><span>IV</span>Study</h4><p>The building code stays open in this page. Collectors and agents can re-run any seed, test neighbouring laws, and publish derivations of the 256 possible laws.</p></div>
+    <div class="movement"><h4><span>V</span>Motion</h4><p>Selected worlds are set in motion — layer-by-layer build films rendered from their seeds — closing the first series.</p></div>
+    <button class="btn solid dlg-close" type="button" data-close>CLOSE</button>
+  </div>
+</dialog>
+
+<dialog id="marketDlg" aria-labelledby="marketTitle">
+  <div class="dlg-inner">
+    <h3 id="marketTitle">The market — <span class="it">preview.</span></h3>
+    <p class="dlg-sub">Trading opens soon through Element on BNB Chain. Until then, this preview shows the shape of the floor: every minted world, its form and its owner, in one place.</p>
+    <div class="market-preview-grid" id="marketPreview"></div>
+    <p class="dlg-sub" style="margin-top:20px">No listings yet — the first worlds have not been minted. When minting opens, listings appear here from the contract.</p>
+    <button class="btn solid dlg-close" type="button" data-close>CLOSE</button>
+  </div>
+</dialog>
+
+<script>
+(function(){
+"use strict";
+/* ============ CONFIG — set the real contract here at launch ============ */
+var CONTRACT = "0x0000000000000000000000000000000000000000"; // placeholder, set at launch
+var OWNER_WALLET = "0xafc0e7cec6948c4904031e665390bba68952bf54"; // contract owner; receives the mint fee
+var SUPPLY = 4444;
+var FEE_WEI = "200000000000000";        // 0.0002 BNB — free-mint fee to owner wallet
+var FEE_HEX = "0xb5e620f48000";         // 0.0002 BNB in wei, hex
+var MINT_SELECTOR = "0x1249c58b";       // mint()
+var BSC_CHAIN_ID = "0x38";              // 56
+var RPCS = ["https://bsc-dataseed.binance.org","https://bsc-dataseed1.defibit.io","https://bsc-dataseed1.ninicoin.io","https://rpc.ankr.com/bsc","https://bsc.publicnode.com"];
+var contractLive = /^0x[0-9a-fA-F]{40}$/.test(CONTRACT) && !/^0x0{40}$/.test(CONTRACT);
+var dark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+function fmt(n){ return n.toLocaleString("en-US"); }
+function $(id){ return document.getElementById(id); }
+
+/* owner wallet paint */
+document.querySelectorAll("[data-owner]").forEach(function(el){ el.textContent = OWNER_WALLET; });
+document.querySelectorAll("[data-owner-short]").forEach(function(el){ el.textContent = (OWNER_WALLET.slice(0,6) + "…" + OWNER_WALLET.slice(-4)).toUpperCase(); });
+
+/* contract address paint */
+if(contractLive){
+  document.querySelectorAll("[data-contract]").forEach(function(el){ el.textContent = CONTRACT; });
+  document.querySelectorAll("[data-contract-short]").forEach(function(el){ el.textContent = ("CONTRACT " + CONTRACT.slice(0,6) + "…" + CONTRACT.slice(-4)).toUpperCase(); });
+  var cs = $("contractState"); if(cs) cs.textContent = "(live on BNB Chain)";
+}
+
+/* ============ seeded rng ============ */
+function mulberry(seed){ var a = seed >>> 0; return function(){ a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+/* ============ iso cube drawing ============ */
+function shade(hex, f){
+  var n = parseInt(hex.slice(1), 16), r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  r = Math.max(0, Math.min(255, Math.round(r * f))); g = Math.max(0, Math.min(255, Math.round(g * f))); b = Math.max(0, Math.min(255, Math.round(b * f)));
+  return "rgb(" + r + "," + g + "," + b + ")";
+}
+function cube(ctx, x, y, s, h, color){
+  // x,y = top-face centre of the base; draws a column of height h (in px)
+  var w = s, hh = s * 0.5;
+  var topY = y - h;
+  ctx.beginPath(); // top
+  ctx.moveTo(x, topY - hh); ctx.lineTo(x + w, topY); ctx.lineTo(x, topY + hh); ctx.lineTo(x - w, topY); ctx.closePath();
+  ctx.fillStyle = color; ctx.fill();
+  ctx.beginPath(); // left
+  ctx.moveTo(x - w, topY); ctx.lineTo(x, topY + hh); ctx.lineTo(x, topY + hh + h); ctx.lineTo(x - w, topY + h); ctx.closePath();
+  ctx.fillStyle = shade(color, 0.62); ctx.fill();
+  ctx.beginPath(); // right
+  ctx.moveTo(x + w, topY); ctx.lineTo(x, topY + hh); ctx.lineTo(x, topY + hh + h); ctx.lineTo(x + w, topY + h); ctx.closePath();
+  ctx.fillStyle = shade(color, 0.4); ctx.fill();
+}
+function pickRamp(ramp, t){ return ramp[Math.max(0, Math.min(ramp.length - 1, Math.floor(t * ramp.length)))]; }
+
+var PALETTES = [
+  { bg:"#FFFFFF", ramp:["#E5E7EB","#D1D5DB","#9CA3AF","#374151","#E04A1A"] },
+  { bg:"#FFFFFF", ramp:["#7FA6E8","#4E7BD9","#2C4FD0","#F2C14E","#EDE7D7"] },
+  { bg:"#FFFFFF", ramp:["#FDE68A","#F59E0B","#E8B04B","#E04A1A","#FFF7ED"] },
+  { bg:"#FFFFFF", ramp:["#3E7CB1","#5E97C4","#9DC3E0","#E5E7EB","#E04A1A"] },
+  { bg:"#FFFFFF", ramp:["#2E7D4F","#4CC06A","#8FD694","#D8EAD3","#F2C14E"] },
+  { bg:"#FFFFFF", ramp:["#E5E7EB","#D1D5DB","#9CA3AF","#F9FAFB","#E04A1A"] },
+  { bg:"#FFFFFF", ramp:["#E5E7EB","#D1D5DB","#9CA3AF","#B3392B","#1D1A16"] },
+  { bg:"#FFFFFF", ramp:["#7B4EA8","#A678D6","#D3B8EE","#F2C14E","#E04A1A"] }
+];
+
+function drawTerrain(canvas, seed, pal, mode){
+  var ctx = canvas.getContext("2d"), W = canvas.width, H = canvas.height;
+  ctx.fillStyle = pal.bg; ctx.fillRect(0, 0, W, H);
+  var rnd = mulberry(seed);
+  var N = mode === "spire" ? 13 : 15;
+  var heights = [], i, j;
+  for(i = 0; i < N; i++){ heights.push([]); for(j = 0; j < N; j++){
+    var cx = (i - N / 2) / N, cy = (j - N / 2) / N, d = Math.sqrt(cx * cx + cy * cy);
+    var v;
+    if(mode === "spire") v = Math.max(0, 1 - d * 2.1) * (0.55 + rnd() * 0.6);
+    else if(mode === "isle") v = Math.max(0, 1 - d * 2.4) * (0.5 + rnd() * 0.55);
+    else if(mode === "maze") v = (rnd() > 0.62) ? 0.35 + rnd() * 0.5 : 0.06;
+    else v = Math.max(0.04, 0.75 - d * 0.9 + (rnd() - 0.5) * 0.55);
+    heights[i].push(v);
+  }}
+  var s = W / (N * 1.55), unit = s * 0.92;
+  var ox = W / 2, oy = H * (mode === "spire" ? 0.34 : 0.3);
+  for(var sum = 0; sum <= 2 * (N - 1); sum++){
+    for(i = 0; i < N; i++){ j = sum - i; if(j < 0 || j >= N) continue;
+      var v = heights[i][j]; if(v <= 0.03) continue;
+      var x = ox + (i - j) * s, y = oy + (i + j) * s * 0.5;
+      var colH = Math.max(unit * 0.35, v * unit * 3.4);
+      cube(ctx, x, y + colH, s * 0.98, colH, pickRamp(pal.ramp, v));
+    }
+  }
+  // top-face labels like the reference cards
+  ctx.fillStyle = shade(pal.ramp[pal.ramp.length - 1], 1);
+  ctx.font = "700 11px 'Space Mono', monospace"; ctx.globalAlpha = 0.75;
+  ctx.fillText("WOXELWORLD", 16, 26);
+  ctx.textAlign = "right"; ctx.fillText("SEED " + seed, W - 16, 26); ctx.textAlign = "left"; ctx.globalAlpha = 1;
+}
+
+/* ============ voxel world page background ============ */
+var VOXEL_COLORS = ["#4CC06A","#2E7D4F","#8FD694","#FFFFFF","#E5E7EB","#3E7CB1","#5E97C4","#E8B04B","#B3392B","#F3F4F6"];
+function drawVoxelBackground(){
+  var c = $("voxelBg"); if(!c) return;
+  var W = window.innerWidth, H = window.innerHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
+  c.width = Math.round(W * dpr); c.height = Math.round(H * dpr);
+  var ctx = c.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  var sky = ctx.createLinearGradient(0, 0, 0, H);
+  sky.addColorStop(0, "#FFFFFF"); sky.addColorStop(.52, "#FFFFFF"); sky.addColorStop(1, "#F8FAFC");
+  ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
+  // blocky pixel clouds
+  var rndC = mulberry(777);
+  ctx.fillStyle = "rgba(243,244,246,.9)";
+  for(var ci = 0; ci < 9; ci++){
+    var cx0 = rndC() * W, cy0 = rndC() * H * 0.28, cs = 14 + rndC() * 18;
+    for(var cb = 0; cb < 7; cb++) ctx.fillRect(cx0 + (cb % 4) * cs, cy0 + Math.floor(cb / 4) * cs * .6, cs * 1.25, cs * .62);
+  }
+  // isometric voxel terrain across the lower half
+  var rnd = mulberry(20261028);
+  var N = W < 640 ? 17 : 24, s = Math.max(15, W / (N * 1.45));
+  var ox = W / 2, oy = H * 0.52;
+  for(var sum = 0; sum <= 2 * (N - 1); sum++){
+    for(var i = 0; i < N; i++){ var j = sum - i; if(j < 0 || j >= N) continue;
+      var dx = (i - N / 2) / N, dy = (j - N / 2) / N, d = Math.sqrt(dx * dx + dy * dy);
+      var v = Math.max(.05, .92 - d * 1.15 + (rnd() - .5) * .5);
+      var x = ox + (i - j) * s, y = oy + (i + j) * s * .5;
+      if(y < H * .38) continue;
+      var colH = Math.max(s * .4, v * s * 2.5);
+      var col = v > .72 ? "#FFFFFF" : v > .5 ? "#DCFCE7" : v > .32 ? "#F3F4F6" : "#DBEAFE";
+      if(rnd() > .965) col = "#FEF3C7";
+      cube(ctx, x, y + colH, s * .98, colH, col);
+      if(rnd() > .93 && v > .45){ // voxel tree: trunk + leaf cube — light grey trunk, no brown
+        cube(ctx, x, y - s * .45, s * .18, s * .55, "#D1D5DB");
+        cube(ctx, x, y - s * 1.05, s * .52, s * .6, "#4CC06A");
+      }
+    }
+  }
+  // floating voxel islands in the sky
+  var rndF = mulberry(4242);
+  for(var fi = 0; fi < 6; fi++){
+    var fx = (fi + .5) * W / 6 + (rndF() - .5) * 60, fy = 54 + rndF() * H * .22, fs = 9 + rndF() * 10;
+    cube(ctx, fx, fy + fs, fs, fs, "#E5E7EB");
+    cube(ctx, fx - fs, fy + fs * .5, fs * .8, fs * .5, "#FFFFFF");
+    cube(ctx, fx + fs, fy + fs * .5, fs * .8, fs * .5, "#F3F4F6");
+    cube(ctx, fx, fy, fs, fs * .55, "#FFFFFF");
+  }
+}
+drawVoxelBackground();
+var bgTimer = null;
+window.addEventListener("resize", function(){ clearTimeout(bgTimer); bgTimer = setTimeout(drawVoxelBackground, 160); });
+
+/* ============ hero pattern — colourful voxel field ============ */
+(function(){
+  var c = $("heroCanvas"), ctx = c.getContext("2d");
+  var rnd = mulberry(20261028), s = 17;
+  ctx.clearRect(0, 0, c.width, c.height);
+  for(var gy = 0; gy < 34; gy++) for(var gx = 0; gx < 100; gx++){
+    var r = rnd(); if(r < 0.38) continue;
+    var x = gx * s + (gy % 2 ? s / 2 : 0), y = gy * s * 0.55;
+    var h = 3 + rnd() * 11;
+    cube(ctx, x, y + h, 6.5, h, VOXEL_COLORS[Math.floor(rnd() * VOXEL_COLORS.length)]);
+  }
+})();
+
+/* ============ Article I — building law lab ============ */
+var ruleBits = [0,1,1,0,1,1,1,0]; // build code 110, index = neighbourhood 111..000
+var seedMode = "single";
+var togglesEl = $("labToggles");
+var NEIGH = [[1,1,1],[1,1,0],[1,0,1],[1,0,0],[0,1,1],[0,1,0],[0,0,1],[0,0,0]];
+NEIGH.forEach(function(pat, idx){
+  var b = document.createElement("button");
+  b.type = "button"; b.className = "toggle"; b.setAttribute("aria-label", "Toggle answer for neighbourhood " + pat.join(""));
+  var patHtml = pat.map(function(v){ return '<span class="cell' + (v ? " on" : "") + '"></span>'; }).join("");
+  b.innerHTML = '<span class="pat">' + patHtml + '</span><span class="ans' + (ruleBits[idx] ? " on" : "") + '"></span>';
+  b.addEventListener("click", function(){
+    ruleBits[idx] = ruleBits[idx] ? 0 : 1;
+    b.querySelector(".ans").classList.toggle("on", !!ruleBits[idx]);
+    updateRuleNo(); drawLab();
+  });
+  togglesEl.appendChild(b);
+});
+function ruleNumber(){ var n = 0; ruleBits.forEach(function(bit, i){ if(bit) n += Math.pow(2, 7 - i); }); return n; }
+function updateRuleNo(){ $("ruleNo").textContent = ruleNumber(); }
+function drawLab(){
+  var c = $("labCanvas"), ctx = c.getContext("2d"), W = c.width, H = c.height;
+  ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0, 0, W, H);
+  var rule = ruleNumber(), cols = 96, rows = 52;
+  var cur = new Array(cols).fill(0);
+  if(seedMode === "single"){ cur[Math.floor(cols / 2)] = 1; }
+  else { var rnd = mulberry(rule * 977 + 13); for(var k = 0; k < cols; k++) cur[k] = rnd() > 0.5 ? 1 : 0; }
+  var s = 5.4, ox = W / 2, oy = 26;
+  var inkC = dark ? "#EDE6D2" : "#1D1A16";
+  for(var r = 0; r < rows; r++){
+    for(var col = 0; col < cols; col++){
+      if(!cur[col]) continue;
+      var x = ox + (col - r) * s, y = oy + (col + r) * s * 0.5;
+      if(x < -10 || x > W + 10 || y > H + 10) continue;
+      cube(ctx, x, y + s * 0.8, s * 0.92, s * 0.8, (col + r) % 29 === 0 ? "#E04A1A" : inkC);
+    }
+    var nxt = new Array(cols).fill(0);
+    for(var c2 = 0; c2 < cols; c2++){
+      var l = cur[(c2 - 1 + cols) % cols], m = cur[c2], rr = cur[(c2 + 1) % cols];
+      var idx = 7 - (l * 4 + m * 2 + rr);
+      nxt[c2] = ruleBits[idx];
+    }
+    cur = nxt;
+  }
+}
+$("randomRuleBtn").addEventListener("click", function(){
+  var good = [110, 30, 90, 150, 182, 54, 126, 62, 94, 122, 158, 250];
+  var n = good[Math.floor(Math.random() * good.length)];
+  for(var i = 0; i < 8; i++) ruleBits[i] = (n >> (7 - i)) & 1;
+  togglesEl.querySelectorAll(".toggle").forEach(function(b, i){ b.querySelector(".ans").classList.toggle("on", !!ruleBits[i]); });
+  updateRuleNo(); drawLab();
+});
+$("singleSeedBtn").addEventListener("click", function(){
+  seedMode = seedMode === "single" ? "random" : "single";
+  $("singleSeedBtn").textContent = seedMode === "single" ? "SINGLE BLOCK" : "RANDOM SEED";
+  drawLab();
+});
+updateRuleNo(); drawLab();
+
+/* ============ forms + worlds + market previews ============ */
+document.querySelectorAll(".form-art").forEach(function(cv, i){
+  var modes = { terra:"terra", spire:"spire", isle:"isle", maze:"maze" };
+  drawTerrain(cv, 400 + i * 137, PALETTES[[1,2,3,4][i]], modes[cv.getAttribute("data-form")]);
+});
+var worldsGrid = $("worldsGrid");
+var formNames = ["TERRA","SPIRE","ISLE","MAZE","TERRA","SPIRE","ISLE","MAZE"];
+var modeNames = ["terra","spire","isle","maze","terra","spire","isle","maze"];
+for(var wi = 0; wi < 8; wi++){
+  var card = document.createElement("article"); card.className = "world-card";
+  var cv = document.createElement("canvas"); cv.width = 440; cv.height = 400;
+  cv.setAttribute("role", "img"); cv.setAttribute("aria-label", "Woxelworld study number " + (wi + 1) + ", form " + formNames[wi]);
+  drawTerrain(cv, 1100 + wi * 331, PALETTES[wi % PALETTES.length], modeNames[wi]);
+  var meta = document.createElement("div"); meta.className = "world-meta";
+  meta.innerHTML = "<span>STUDY <b>Nº " + (wi + 1) + "</b></span><span>" + formNames[wi] + "</span><span>BUILD " + [110, 30, 90, 182, 150, 54, 126, 62][wi] + "</span>";
+  card.appendChild(cv); card.appendChild(meta); worldsGrid.appendChild(card);
+}
+var mp = $("marketPreview");
+for(var mi = 0; mi < 3; mi++){
+  var mcv = document.createElement("canvas"); mcv.width = 300; mcv.height = 260;
+  drawTerrain(mcv, 7700 + mi * 517, PALETTES[(mi + 2) % PALETTES.length], modeNames[mi]);
+  mp.appendChild(mcv);
+}
+
+/* ============ copy buttons ============ */
+document.querySelectorAll("[data-copy]").forEach(function(btn){
+  btn.addEventListener("click", function(){
+    var el = $(btn.getAttribute("data-copy"));
+    var text = el.innerText;
+    function done(){ var old = btn.textContent; btn.textContent = "COPIED"; setTimeout(function(){ btn.textContent = old; }, 1600); }
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(done).catch(done); }
+    else { var ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select(); try{ document.execCommand("copy"); }catch(e){} document.body.removeChild(ta); done(); }
+  });
+});
+
+/* ============ faq ============ */
+document.querySelectorAll(".faq-item").forEach(function(item){
+  var q = item.querySelector(".faq-q");
+  q.addEventListener("click", function(){
+    var open = item.classList.toggle("open");
+    q.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+});
+
+/* ============ dialogs ============ */
+function wireDialog(btnId, dlgId){
+  var dlg = $(dlgId); if(!dlg) return;
+  $(btnId).addEventListener("click", function(){ if(dlg.showModal) dlg.showModal(); });
+  dlg.querySelectorAll("[data-close]").forEach(function(b){ b.addEventListener("click", function(){ dlg.close(); }); });
+  dlg.addEventListener("click", function(e){ if(e.target === dlg) dlg.close(); });
+}
+wireDialog("programmeBtn", "programmeDlg");
+wireDialog("marketBtn", "marketDlg");
+
+/* ============ nav highlight ============ */
+var navLinks = document.querySelectorAll("nav.main a");
+var obs = new IntersectionObserver(function(entries){
+  entries.forEach(function(en){
+    if(en.isIntersecting){
+      navLinks.forEach(function(a){ a.classList.toggle("active", a.getAttribute("data-nav") === en.target.id); });
+    }
+  });
+}, { rootMargin: "-40% 0px -55% 0px" });
+["law","forms","mint","worlds","market","roadmap"].forEach(function(id){ var s = $(id); if(s) obs.observe(s); });
+
+/* ============ live supply (activates when a real contract is set) ============ */
+var minted = 0, shownMinted = 0;
+function renderSupply(){
+  $("mintedCount").textContent = fmt(shownMinted);
+  $("remainingCount").textContent = fmt(Math.max(0, SUPPLY - shownMinted));
+  $("chipMinted").textContent = fmt(shownMinted);
+  var pct = Math.min(100, shownMinted / SUPPLY * 100);
+  $("progressFill").style.width = pct + "%";
+  $("progressMark").style.left = "calc(" + pct + "% - 1px)";
+}
+function rpcCall(method, params){
+  var chain = Promise.reject(new Error("start"));
+  RPCS.forEach(function(url){
+    chain = chain.catch(function(){
+      return fetch(url, { method:"POST", headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({ jsonrpc:"2.0", id:1, method:method, params:params }) })
+        .then(function(r){ return r.json(); })
+        .then(function(j){ if(j.error) throw new Error("rpc"); return j.result; });
+    });
+  });
+  return chain;
+}
+function fetchSupply(){
+  if(!contractLive) return Promise.resolve(false);
+  return rpcCall("eth_call", [{ to: CONTRACT, data: "0x18160ddd" }, "latest"]) // totalSupply()
+    .then(function(res){
+      var n = parseInt(res, 16);
+      if(!isNaN(n) && n >= shownMinted){ shownMinted = n; minted = n; renderSupply(); }
+      $("mintStatus").textContent = shownMinted >= SUPPLY ? "SOLD OUT" : "MINT LIVE";
+      return true;
+    }).catch(function(){ return false; });
+}
+if(contractLive){
+  fetchSupply().then(function(ok){ if(!ok) $("mintStatus").textContent = "READING CONTRACT…"; });
+  setInterval(fetchSupply, 30000);
+} else {
+  $("mintStatus").textContent = "MINT OPENS AT LAUNCH";
+}
+renderSupply();
+
+/* ============ wallet connect + mint ============ */
+var provider = null, account = null;
+function getProvider(){
+  if(window.okxwallet) return window.okxwallet;             // OKX first
+  if(window.ethereum) return window.ethereum;                // Binance / MetaMask / Trust inject here
+  return null;
+}
+function wp(html){ $("wpStatus").innerHTML = html; }
+async function ensureBSC(p){
+  var cid = await p.request({ method: "eth_chainId" });
+  if(cid !== BSC_CHAIN_ID){
+    try { await p.request({ method: "wallet_switchEthereumChain", params: [{ chainId: BSC_CHAIN_ID }] }); }
+    catch(e){
+      if(e && e.code === 4902){
+        await p.request({ method: "wallet_addEthereumChain", params: [{ chainId: BSC_CHAIN_ID, chainName: "BNB Smart Chain", nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 }, rpcUrls: ["https://bsc-dataseed.binance.org"], blockExplorerUrls: ["https://bscscan.com"] }] });
+      } else throw e;
+    }
+  }
+}
+$("connectBtn").addEventListener("click", async function(){
+  provider = getProvider();
+  if(!provider){ wp('<span class="err">No wallet found.</span> Open this page inside the Binance Agentic Wallet app — or the OKX / MetaMask / Trust dApp browser — then tap Connect again.'); return; }
+  try {
+    await ensureBSC(provider);
+    var accs = await provider.request({ method: "eth_requestAccounts" });
+    account = accs && accs[0];
+    if(account){
+      $("connectBtn").textContent = account.slice(0, 6) + "…" + account.slice(-4);
+      wp('<span class="ok">Connected:</span> ' + account + (contractLive ? ' — ready to mint. One world per wallet.' : ' — wallet ready. Minting unlocks the moment the contract address is set at launch.'));
+      if(contractLive) $("mintBtn").disabled = false;
+    }
+  } catch(e){ wp('<span class="err">Connection rejected in the wallet.</span> Approve the request in your wallet and try again.'); }
+});
+$("mintBtn").addEventListener("click", async function(){
+  if(!contractLive){ wp('<span class="err">Contract not set yet.</span> This page ships ready: the moment the Woxelworld contract address is set at launch, this button sends the real mint() call with the 0.0002 BNB fee.'); return; }
+  if(!provider || !account){ wp('Connect your Agentic Wallet first.'); return; }
+  try {
+    await ensureBSC(provider);
+    wp("Sending mint() with exactly 0.0002 BNB… confirm in your wallet.");
+    var tx = await provider.request({ method: "eth_sendTransaction", params: [{ from: account, to: CONTRACT, value: FEE_HEX, data: MINT_SELECTOR }] });
+    wp('<span class="ok">Mint sent.</span> Tx: ' + tx + ' — your world is fixed in this block. Refreshing supply…');
+    setTimeout(fetchSupply, 4000);
+  } catch(e){ wp('<span class="err">Mint did not go through.</span> The wallet rejected it, the wallet holds no Agent ID, or this wallet has already minted its one world.'); }
+});
+
+/* ============ check a wallet ============ */
+$("checkBtn").addEventListener("click", async function(){
+  var v = $("checkInput").value.trim(), out = $("checkResult");
+  if(!/^0x[0-9a-fA-F]{40}$/.test(v)){ out.textContent = "That does not look like a wallet address — it should be 0x plus 40 characters."; return; }
+  if(!contractLive){ out.textContent = "Address format is valid. The contract is not set yet, so mint checks go live at launch."; return; }
+  out.textContent = "Checking…";
+  try {
+    var data = "0x70a08231" + "000000000000000000000000" + v.slice(2).toLowerCase(); // balanceOf(address)
+    var res = await rpcCall("eth_call", [{ to: CONTRACT, data: data }, "latest"]);
+    var n = parseInt(res, 16);
+    out.textContent = n > 0 ? "This wallet has already minted its Woxelworld (1 per wallet)." : "This wallet has not minted yet — it can mint one world.";
+  } catch(e){ out.textContent = "Could not read the contract right now. Try again in a moment."; }
+});
+})();
+</script>
+</body>
+</html>
